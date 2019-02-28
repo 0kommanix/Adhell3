@@ -11,3 +11,6 @@
 fabric.properties
 app/release
 app/libs
+app/app.properties
+0kommanix.key
+keystore
