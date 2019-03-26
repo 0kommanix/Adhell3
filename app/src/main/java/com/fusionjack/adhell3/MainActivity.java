@@ -1,10 +1,10 @@
 package com.fusionjack.adhell3;
 
-import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.internal.BottomNavigationItemView;
-import android.support.design.internal.BottomNavigationMenuView;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -30,15 +30,17 @@ import com.fusionjack.adhell3.utils.DeviceAdminInteractor;
 import com.fusionjack.adhell3.utils.LogUtils;
 import com.fusionjack.adhell3.utils.PasswordStorage;
 
-import java.lang.reflect.Field;
+import static com.fusionjack.adhell3.fragments.SettingsFragment.SET_NIGHT_MODE_PREFERENCE;
 
 public class MainActivity extends AppCompatActivity {
     private static final String BACK_STACK_TAB_TAG = "tab_fragment";
     private FragmentManager fragmentManager;
     private ActivationDialogFragment activationDialogFragment;
     private AlertDialog passwordDialog;
+    private BottomNavigationView bottomBar;
     private int selectedTabId = -1;
     private boolean doubleBackToExitPressedOnce = false;
+    private String themeChange;
 
     @Override
     public void onBackPressed() {
@@ -59,7 +61,28 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences  mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (mPrefs.getBoolean(SET_NIGHT_MODE_PREFERENCE, false)) {
+            getDelegate().setDefaultNightMode(getDelegate().MODE_NIGHT_YES);
+        }
+        else {
+            getDelegate().setDefaultNightMode(getDelegate().MODE_NIGHT_NO);
+        }
         super.onCreate(savedInstanceState);
+        themeChange = getIntent().getStringExtra("settingsFragment");
+
+        // Remove elevation shadow of ActionBar
+        getSupportActionBar().setElevation(0);
+
+        // Change status bar icon tint based on theme
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decor = getWindow().getDecorView();
+            if (!mPrefs.getBoolean(SET_NIGHT_MODE_PREFERENCE, false)) {
+                decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            } else {
+                decor.setSystemUiVisibility(0);
+            }
+        }
 
         // Set the crash handler to log crash's stack trace into a file
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashHandler)) {
@@ -80,14 +103,11 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView bottomBar = findViewById(R.id.bottomBar);
+        bottomBar = findViewById(R.id.bottomBar);
         bottomBar.setOnNavigationItemSelectedListener(item -> {
             onTabSelected(item.getItemId());
             return true;
         });
-
-        // Nasty workaround to show text and icon if the tab count more than 3
-        removeShiftMode(bottomBar);
     }
 
     @Override
@@ -143,12 +163,18 @@ public class MainActivity extends AppCompatActivity {
             case R.id.othersTab:
                 selectedTabId = R.id.othersTab;
                 replacing = new OtherTabFragment();
+                if(themeChange != null){
+                    if (themeChange.matches(SET_NIGHT_MODE_PREFERENCE)){
+                        Bundle bundle = new Bundle();
+                        bundle.putString("viewpager_position", "Settings");
+                        replacing.setArguments(bundle);
+                    }
+                }
                 break;
             default:
                 selectedTabId = -1;
                 replacing = new HomeTabFragment();
         }
-
         fragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, replacing)
                 .addToBackStack(BACK_STACK_TAB_TAG)
@@ -191,7 +217,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Select the Home tab manually if nothing is selected
         if (selectedTabId == -1) {
-            onTabSelected(R.id.homeTab);
+            if (themeChange != null) {
+                if (themeChange.matches(SET_NIGHT_MODE_PREFERENCE)){
+                    bottomBar.setSelectedItemId(R.id.othersTab);
+                    onTabSelected(R.id.othersTab);
+
+                }
+                else {
+                    onTabSelected(R.id.homeTab);
+                }
+            }
+            else {
+                onTabSelected(R.id.homeTab);
+            }
         }
 
         return true;
@@ -233,28 +271,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
         return passwordDialog;
-    }
-
-    @SuppressLint("RestrictedApi")
-    private void removeShiftMode(BottomNavigationView view) {
-        BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);
-        try {
-            Field shiftingMode = menuView.getClass().getDeclaredField("mShiftingMode");
-            shiftingMode.setAccessible(true);
-            shiftingMode.setBoolean(menuView, false);
-            shiftingMode.setAccessible(false);
-            for (int i = 0; i < menuView.getChildCount(); i++) {
-                BottomNavigationItemView item = (BottomNavigationItemView) menuView.getChildAt(i);
-                //noinspection RestrictedApi
-                item.setShiftingMode(false);
-                // set once again checked value, so view will be updated
-                //noinspection RestrictedApi
-                item.setChecked(item.getItemData().isChecked());
-            }
-        } catch (NoSuchFieldException e) {
-            LogUtils.error( "Unable to get shift mode field", e);
-        } catch (IllegalAccessException e) {
-            LogUtils.error( "Unable to change value of shift mode", e);
-        }
     }
 }

@@ -13,9 +13,11 @@ import android.support.v14.preference.SwitchPreference;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,12 +27,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fusionjack.adhell3.BuildConfig;
+import com.fusionjack.adhell3.MainActivity;
 import com.fusionjack.adhell3.R;
 import com.fusionjack.adhell3.blocker.ContentBlocker;
 import com.fusionjack.adhell3.blocker.ContentBlocker56;
 import com.fusionjack.adhell3.db.DatabaseFactory;
 import com.fusionjack.adhell3.dialogfragment.ActivationDialogFragment;
 import com.fusionjack.adhell3.receiver.CustomDeviceAdminReceiver;
+import com.fusionjack.adhell3.tasks.BackupDatabaseAsyncTask;
 import com.fusionjack.adhell3.utils.AdhellFactory;
 import com.fusionjack.adhell3.utils.AppPreferences;
 import com.fusionjack.adhell3.utils.LogUtils;
@@ -46,8 +50,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private static final String RESTORE_PREFERENCE = "restore_preference";
     public static final String UPDATE_PROVIDERS_PREFERENCE = "update_provider_preference";
     public static final String SET_PASSWORD_PREFERENCE = "set_password_preference";
+    public static final String SET_NIGHT_MODE_PREFERENCE = "set_night_mode_preference";
     public static final String CREATE_LOGCAT_PREFERENCE = "create_logcat_preference";
     public static final String CHANGE_KEY_PREFERENCE = "change_key_preference";
+    public static final String ABOUT_PREFERENCE = "about_preference";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -153,6 +159,24 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 }
                 break;
             }
+            case SET_NIGHT_MODE_PREFERENCE: {
+                PreferenceManager preferenceManager = getPreferenceManager();
+                if (preferenceManager.getSharedPreferences().getBoolean(SET_NIGHT_MODE_PREFERENCE, false)) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.putExtra("settingsFragment", SET_NIGHT_MODE_PREFERENCE);
+                    startActivity(intent);
+                    getActivity().finish();
+                }
+                else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.putExtra("settingsFragment", SET_NIGHT_MODE_PREFERENCE);
+                    startActivity(intent);
+                    getActivity().finish();
+                }
+                break;
+            }
             case CREATE_LOGCAT_PREFERENCE: {
                 String filename = LogUtils.createLogcat();
                 if (filename.isEmpty()) {
@@ -172,50 +196,21 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 }
                 break;
             }
+
+            case ABOUT_PREFERENCE: {
+                View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_question, (ViewGroup) getView(), false);
+                TextView titlTextView = dialogView.findViewById(R.id.titleTextView);
+                titlTextView.setText(R.string.about_title);
+                TextView questionTextView = dialogView.findViewById(R.id.questionTextView);
+                questionTextView.setText(R.string.about_content);
+                questionTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                new AlertDialog.Builder(context)
+                        .setView(dialogView)
+                        .setPositiveButton(android.R.string.yes, null).show();
+                break;
+            }
         }
         return super.onPreferenceTreeClick(preference);
-    }
-
-    private static class BackupDatabaseAsyncTask extends AsyncTask<Void, Void, String> {
-        private ProgressDialog dialog;
-        private AlertDialog.Builder builder;
-
-        BackupDatabaseAsyncTask(Activity activity) {
-            dialog = new ProgressDialog(activity);
-            builder = new AlertDialog.Builder(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setMessage("Backup database is running...");
-            dialog.show();
-        }
-
-        @Override
-        protected String doInBackground(Void... args) {
-            try {
-                DatabaseFactory.getInstance().backupDatabase();
-                return null;
-            } catch (Exception e) {
-                return e.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String message) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-            if (message == null) {
-                builder.setMessage("Backup database is finished");
-                builder.setTitle("Info");
-            } else {
-                builder.setMessage(message);
-                builder.setTitle("Error");
-            }
-            builder.create().show();
-        }
     }
 
     private static class RestoreDatabaseAsyncTask extends AsyncTask<Void, String, String> {

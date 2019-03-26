@@ -58,6 +58,7 @@
         Edit DNS only if you know the issues it can cause.
         \nToggle Domain rules to apply changes.
     </string>
+    <string name="export_domains_title">Export Domains</string>
     <string name="blacklist_info">
         Blacklist domains or define firewall denial rules.
         \nToggle Domain rules to apply domain changes.
@@ -90,6 +91,12 @@
         \nTherefore, if they are still disabled after this operation, you need to uninstall Adhell to enable them.
         \n\nDo you really want to enable all apps\' components?
     </string>
+    <string name="dialog_system_app_components_title">System apps are listed</string>
+    <string name="dialog_system_app_components_info">
+        Be careful when disabling system apps\' permissions, services and receivers.
+        \nSamsung Knox doesn\'t have an API to clear disabled components.
+        \nIf the database is corrupted, you cannot re-enable them and you need to do a factory reset.
+    </string>
     <string name="dialog_toggle_title">Custom DNS for All Apps</string>
     <string name="dialog_toggle_info">
         Do you really want to apply or remove custom DNS for all apps?
@@ -100,7 +107,7 @@
     <string name="package_disabler_fragment_title">Disable Apps</string>
     <string name="apps_management_bottombar_title">Apps</string>
     <string name="domains_bottombar_title">Domains</string>
-    <string name="last_day_blocked">Domains blocked in past 24 hours:&#160;</string>
+    <string name="last_day_blocked">Domains blocked in past 72 hours:&#160;</string>
     <string name="check_input_dns">Invalid DNS format.</string>
     <string name="changed_dns">DNS addresses have been set. Toggle Domain rules to apply changes.</string>
     <string name="restored_dns">DNS has been restored to defaults. Toggle Domain rules to apply changes.</string>
@@ -152,6 +159,8 @@
         \nSamsung Knox doesn\'t have an API to list disabled receivers.
         \nTherefore, if the disabled receivers don\'t appear below, you need to reinstall the app.
     </string>
+    <string name="backup">Backup</string>
+    <string name="uninstall">Uninstall</string>
     <string name="backup_database">Backup Database</string>
     <string name="backup_database_summary">Backup all settings into a backup file in internal storage.</string>
     <string name="restore_database">Restore Database</string>
@@ -166,6 +175,12 @@
     <string name="settings_fragment_title">Settings</string>
     <string name="enable_apps_dialog_title">Enable All Apps</string>
     <string name="enable_apps_dialog_text">Do you really want to enable all apps?</string>
+    <string name="delete_provider_dialog_title">Delete Provider</string>
+    <string name="delete_provider_dialog_text">Do you really want to delete the provider?</string>
+    <string name="delete_domain_dialog_title">Delete Domain</string>
+    <string name="delete_domain_dialog_text">Do you really want to delete the domain?</string>
+    <string name="delete_domain_firewall_dialog_title">Delete Domain or Firewall Rule</string>
+    <string name="delete_domain_firewall_dialog_text">Do you really want to delete the domain or firewall rule?</string>
     <string name="backup_database_dialog_title">Backup Database</string>
     <string name="backup_database_dialog_text">Do you really want to backup the database and replace any existing backup?</string>
     <string name="restore_database_dialog_title">Restore Database</string>
@@ -191,10 +206,27 @@
     <string name="dialog_empty_password">The password cannot be empty!</string>
     <string name="set_password_title">Protect Adhell3 with a password</string>
     <string name="set_password_summary">If you forget the password, you need to uninstall Adhell3.</string>
+    <string name="set_night_mode">Night Mode</string>
+    <string name="set_night_mode_summary">Enable dark theme for Adhell3</string>
     <string name="create_logcat_title">Create logcat</string>
     <string name="create_logcat_summary">Create logcat on internal storage for debugging purpose.</string>
     <string name="logcat_created">Logcat \'%1$s\' has been created.</string>
     <string name="logcat_not_created">Logcat cannot be created.</string>
     <string name="change_key_title">Change license key</string>
     <string name="change_key_summary">Show activation dialog to change the license key.</string>
+    <string name="about_title">About</string>
+    <string name="about_summary">About adhell3</string>
+    <string name="about_content">Adhell3 is merely an app that is using the Samsung Knox SDK APIs.
+        \n
+        \nScript to build apk:
+        \n<a href="https://gitlab.com/fusionjack/adhell3-scripts">https://gitlab.com/fusionjack/adhell3-scripts</a>
+        \nSource code:
+        \n<a href="https://gitlab.com/fusionjack/adhell3">https://gitlab.com/fusionjack/adhell3</a>
+        \nDiscord:
+        \n<a href="https://discord.gg/hfreZum">https://discord.gg/hfreZum</a>
+        \nReddit:
+        \n<a href="https://www.reddit.com/r/Adhell/">https://www.reddit.com/r/Adhell</a>
+        \n
+        \nAdhell3 is licensed under a <a href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License.</a>
+    </string>
 </resources>
